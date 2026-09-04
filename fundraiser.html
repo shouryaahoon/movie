@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>The Sala Movie Fund — Now Showing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c0b0a;
+    --bg-soft:#171310;
+    --curtain:#4a0e14;
+    --gold:#e3b34d;
+    --gold-bright:#ffd98a;
+    --paper:#f2e8cf;
+    --ink:#241a12;
+    --text:#f4efe3;
+    --text-dim:#b3a691;
+    --stamp:#c8232f;
+    --max-w:760px;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Manrope',sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  .vignette{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background:
+      radial-gradient(ellipse at 50% -10%, rgba(227,179,77,.12), transparent 55%),
+      radial-gradient(ellipse at 50% 115%, rgba(74,14,20,.4), transparent 60%);
+    z-index:0;
+  }
+
+  .sr-only{
+    position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+    clip:rect(0,0,0,0);white-space:nowrap;border:0;
+  }
+
+  /* Film-reel strip */
+  .reel-strip{
+    height:20px;
+    background-color:var(--gold);
+    background-image:radial-gradient(circle, var(--bg) 0 6px, transparent 6.5px);
+    background-size:32px 20px;
+    background-repeat:repeat-x;
+    background-position:center;
+    position:relative;
+    z-index:1;
+  }
+
+  /* Marquee */
+  .curtain-frame{
+    position:relative;
+    z-index:1;
+    padding:34px clamp(16px,4vw,40px) 0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .bulbs{
+    display:flex;
+    justify-content:space-between;
+    width:min(100%, 640px);
+    padding:0 6px;
+    margin-bottom:14px;
+  }
+  .bulbs-bottom{margin-top:14px; margin-bottom:0;}
+  .bulb{
+    width:9px; height:9px; border-radius:50%;
+    background:var(--gold-bright);
+    animation:bulbPulse 1.6s ease-in-out infinite;
+  }
+  @keyframes bulbPulse{
+    0%,100%{opacity:.3; box-shadow:0 0 3px 1px rgba(255,217,138,.4);}
+    50%{opacity:1; box-shadow:0 0 9px 3px rgba(255,217,138,.85);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .bulb{animation:none; opacity:.85; box-shadow:0 0 6px 2px rgba(255,217,138,.6);}
+  }
+
+  .marquee{
+    width:min(100%, 640px);
+    text-align:center;
+    background:linear-gradient(180deg,#171009,#0d0a07);
+    border:2px solid var(--gold);
+    border-radius:8px;
+    padding:clamp(28px,5vw,44px) 20px;
+    box-shadow:0 20px 60px -20px rgba(0,0,0,.8), 0 0 0 6px var(--bg-soft) inset;
+  }
+  .marquee-kicker{
+    margin:0 0 10px;
+    font-family:'Space Mono',monospace;
+    font-size:.72rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--gold);
+  }
+  .marquee-title{
+    margin:0;
+    font-family:'Bebas Neue',sans-serif;
+    font-weight:400;
+    font-size:clamp(2.6rem,9vw,4.6rem);
+    letter-spacing:.02em;
+    line-height:.95;
+    color:var(--gold-bright);
+    text-shadow:0 0 18px rgba(255,217,138,.35);
+  }
+  .marquee-sub{
+    margin:14px 0 0;
+    color:var(--text-dim);
+    font-size:1rem;
+  }
+
+  /* Layout */
+  .container{
+    max-width:var(--max-w);
+    margin:0 auto;
+    padding:48px clamp(16px,4vw,24px) 0;
+    position:relative;
+    z-index:1;
+  }
+
+  /* Memo */
+  .memo{
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:6px;
+    padding:clamp(22px,4vw,34px);
+    box-shadow:0 24px 50px -24px rgba(0,0,0,.6);
+    margin-bottom:56px;
+  }
+  .memo-fields{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    font-family:'Space Mono',monospace;
+    font-size:.82rem;
+    border-bottom:1px dashed rgba(36,26,18,.35);
+    padding-bottom:14px;
+    margin-bottom:18px;
+    color:rgba(36,26,18,.75);
+  }
+  .field-label{
+    display:inline-block;
+    width:52px;
+    font-weight:700;
+    color:var(--curtain);
+  }
+  .memo p{margin:0 0 14px;}
+  .memo p:last-of-type{margin-bottom:20px;}
+  .memo strong{color:var(--curtain);}
+
+  .callsheet{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+    gap:16px;
+    margin:0;
+    padding-top:16px;
+    border-top:1px dashed rgba(36,26,18,.35);
+  }
+  .callsheet dt{
+    font-family:'Space Mono',monospace;
+    font-size:.68rem;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:rgba(36,26,18,.6);
+    margin-bottom:4px;
+  }
+  .callsheet dd{margin:0; font-weight:600;}
+
+  /* Tiers */
+  .tiers-section h2, .dossier h2{
+    font-family:'Manrope',sans-serif;
+    font-size:clamp(1.3rem,3vw,1.6rem);
+    font-weight:800;
+    margin:0 0 24px;
+    text-align:center;
+  }
+  .tiers-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:24px 20px;
+    margin-bottom:56px;
+  }
+  @media (max-width:560px){
+    .tiers-grid{grid-template-columns:1fr;}
+  }
+
+  .ticket{
+    position:relative;
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:8px;
+    padding:20px 20px 0;
+    transform:rotate(var(--rot,0deg));
+    box-shadow:0 16px 32px -18px rgba(0,0,0,.65);
+    transition:transform .25s ease, box-shadow .25s ease;
+  }
+  .ticket:hover{
+    transform:rotate(0deg) translateY(-6px);
+    box-shadow:0 24px 40px -16px rgba(0,0,0,.75);
+  }
+  .ticket--vip{
+    grid-column:1 / -1;
+    border:1.5px solid var(--gold);
+    background:linear-gradient(160deg,var(--paper),#f8edd3);
+  }
+
+  .ticket-eyebrow{
+    font-family:'Space Mono',monospace;
+    font-size:.72rem;
+    letter-spacing:.06em;
+    color:rgba(36,26,18,.5);
+    margin:0 0 10px;
+  }
+  .ticket-icon{font-size:2rem; margin-bottom:6px;}
+  .ticket h3{margin:0 0 6px; font-size:1.05rem; font-weight:800;}
+  .ticket-desc{margin:0; font-size:.88rem; color:rgba(36,26,18,.75);}
+
+  .tear{
+    position:relative;
+    margin:18px -20px 0;
+    border-top:2px dashed rgba(36,26,18,.3);
+  }
+  .tear::before, .tear::after{
+    content:"";
+    position:absolute;
+    top:50%;
+    width:18px; height:18px;
+    background:var(--bg);
+    border-radius:50%;
+    transform:translateY(-50%);
+  }
+  .tear::before{left:-9px;}
+  .tear::after{right:-9px;}
+
+  .ticket-foot{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:16px 0 20px;
+  }
+  .ticket-price{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:1.8rem;
+    color:var(--curtain);
+    letter-spacing:.02em;
+  }
+  .ticket--vip .ticket-price{color:#8a5b00;}
+
+  .fund-btn{
+    background:var(--curtain);
+    color:var(--text);
+    border:none;
+    padding:10px 16px;
+    border-radius:5px;
+    font-family:'Manrope',sans-serif;
+    font-weight:700;
+    font-size:.85rem;
+    cursor:pointer;
+    transition:background .2s ease;
+  }
+  .fund-btn:hover{background:#63131b;}
+  .fund-btn:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+  .ticket--vip .fund-btn{background:var(--gold); color:var(--ink);}
+  .ticket--vip .fund-btn:hover{background:var(--gold-bright);}
+
+  /* Dossier */
+  .dossier{
+    position:relative;
+    background:linear-gradient(160deg,#241b13,#181109);
+    border:1px dashed rgba(227,179,77,.4);
+    border-radius:8px;
+    padding:clamp(26px,5vw,36px);
+    margin-bottom:56px;
+    overflow:hidden;
+  }
+  .dossier h2{color:var(--text);}
+  .dossier p{margin:0 auto; color:var(--text-dim); max-width:56ch; text-align:center;}
+  
+  .nda-checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 24px;
+    color: var(--gold-bright);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+  .nda-checkbox input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--stamp);
+    border-radius: 4px;
+    background: rgba(200, 35, 47, 0.1);
+    cursor: pointer;
+    position: relative;
+  }
+  .nda-checkbox input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: -2px;
+    left: 4px;
+    color: var(--stamp);
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  .stamp{
+    position:absolute;
+    top:22px; right:clamp(16px,4vw,32px);
+    border:3px double var(--stamp);
+    color:var(--stamp);
+    font-family:'Space Mono',monospace;
+    font-weight:700;
+    font-size:.82rem;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    padding:6px 12px;
+    transform:rotate(-9deg);
+    opacity:.9;
+  }
+  @media (max-width:480px){
+    .stamp{position:static; display:inline-block; margin-bottom:16px; transform:rotate(-4deg);}
+  }
+
+  /* Footer */
+  .credits{
+    text-align:center;
+    padding:40px 20px 60px;
+    color:var(--text-dim);
+    font-size:.85rem;
+    position:relative;
+    z-index:1;
+  }
+  .credits p{margin:0 0 6px;}
+  .fine-print{
+    font-family:'Space Mono',monospace;
+    font-size:.72rem;
+    color:rgba(179,166,145,.65);
+  }
+
+  /* Modal */
+  .modal-overlay{
+    position:fixed; inset:0;
+    background:rgba(6,5,4,.82);
+    display:flex; align-items:center; justify-content:center;
+    padding:20px;
+    z-index:50;
+  }
+  .modal-overlay[hidden]{display:none;}
+  .ticket-modal{
+    position:relative;
+    width:100%; max-width:360px;
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:10px;
+    padding:28px 24px 24px;
+    text-align:center;
+    box-shadow:0 30px 70px -20px rgba(0,0,0,.7);
+    animation:modalIn .22s ease;
+  }
+  @keyframes modalIn{
+    from{opacity:0; transform:translateY(14px) scale(.97);}
+    to{opacity:1; transform:translateY(0) scale(1);}
+  }
+  @media (prefers-reduced-motion: reduce){.ticket-modal{animation:none;}}
+  .ticket-modal-notch{
+    position:absolute; top:108px; width:20px; height:20px;
+    background:var(--bg); border-radius:50%;
+  }
+  .ticket-modal-notch.left{left:-10px;}
+  .ticket-modal-notch.right{right:-10px;}
+
+  .ticket-modal .ticket-eyebrow{text-align:center;}
+  .ticket-modal h3{margin:4px 0 10px; font-family:'Manrope',sans-serif; font-size:1.15rem; font-weight:800;}
+  #modalText{margin:0 0 6px; font-size:.95rem;}
+  
+  /* QR Code styling */
+  .qr-code-img {
+    display: block;
+    margin: 16px auto;
+    max-width: 180px;
+    border-radius: 8px;
+    border: 2px solid rgba(36,26,18,.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .modal-fine{font-size:.78rem; color:rgba(36,26,18,.6); margin:10px 0 20px;}
+
+  .pay-btn{
+    width:100%;
+    background:var(--curtain);
+    color:var(--text);
+    border:none;
+    padding:13px 20px;
+    border-radius:7px;
+    font-weight:800;
+    font-size:1rem;
+    cursor:pointer;
+    transition:background .2s ease;
+  }
+  .pay-btn:hover{background:#63131b;}
+  .copy-btn{
+    width:100%;
+    margin-top:10px;
+    background:transparent;
+    border:1.5px solid rgba(36,26,18,.25);
+    color:var(--ink);
+    padding:11px 20px;
+    border-radius:7px;
+    font-weight:700;
+    font-size:.88rem;
+    cursor:pointer;
+  }
+  .copy-btn:hover{border-color:var(--curtain); color:var(--curtain);}
+  .cancel-btn{
+    display:block;
+    margin:14px auto 0;
+    background:none;
+    border:none;
+    color:rgba(36,26,18,.5);
+    text-decoration:underline;
+    cursor:pointer;
+    font-size:.82rem;
+  }
+  button:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+</style>
+</head>
+<body>
+
+  <div class="vignette" aria-hidden="true"></div>
+
+  <div class="curtain-frame">
+    <div class="bulbs bulbs-top" id="bulbsTop" aria-hidden="true"></div>
+    <header class="marquee">
+      <p class="marquee-kicker">This weekend only</p>
+      <h1 class="marquee-title">THE SALA<br>MOVIE FUND</h1>
+      <p class="marquee-sub">An emergency production, financed by you.</p>
+    </header>
+    <div class="bulbs bulbs-bottom" id="bulbsBottom" aria-hidden="true"></div>
+  </div>
+
+  <div class="reel-strip" aria-hidden="true"></div>
+
+  <main class="container">
+
+    <section class="memo" aria-labelledby="memo-heading">
+      <h2 id="memo-heading" class="sr-only">Funding request</h2>
+      <div class="memo-fields">
+        <div><span class="field-label">To</span>Jija ji, Executive Producer (prospective)</div>
+        <div><span class="field-label">From</span>The Director, sole cast &amp; crew</div>
+        <div><span class="field-label">Re</span>Emergency weekend budget approval</div>
+      </div>
+      <p>Dearest Jija ji,</p>
+      <p>The stage is set and the audience — me — is ready. Unfortunately, the lead actor is facing a severe budget deficit. My wallet is currently emptier than a theatre on a Monday morning.</p>
+      <p>Consider this a direct appeal to the <strong>Ultimate VIP Financier</strong>. Without urgent investment, this weekend wraps as a tragic flop, and I spend Saturday night buffering 144p trailers on YouTube instead.</p>
+      <dl class="callsheet">
+        <div><dt>Budget</dt><dd>₹1,500 – ₹2,000</dd></div>
+        <div><dt>Runtime</dt><dd>One night only</dd></div>
+        <div><dt>Includes</dt><dd>Interval snacks + a fried chicken treat</dd></div>
+      </dl>
+    </section>
+
+    <section class="tiers-section" aria-labelledby="tiers-heading">
+      <h2 id="tiers-heading">Producer credits, by contribution</h2>
+      <div class="tiers-grid">
+
+        <article class="ticket" style="--rot:-1.1deg">
+          <p class="ticket-eyebrow">No. 001</p>
+          <div class="ticket-icon">🍿</div>
+          <h3>Popcorn Philanthropist</h3>
+          <p class="ticket-desc">Keeps me fed through the previews.</p>
+          <div class="tear"></div>
+          <div class="ticket-foot">
+            <span class="ticket-price">₹200</span>
+            <button class="fund-btn" onclick="triggerInvestment('Popcorn Philanthropist', 200)">Send ₹200</button>
+          </div>
+        </article>
+
+        <article class="ticket" style="--rot:0.9deg">
+          <p class="ticket-eyebrow">No. 002</p>
+          <div class="ticket-icon">🥤</div>
+          <h3>Beverage Baron</h3>
+          <p class="ticket-desc">Keeps the tears of joy flowing.</p>
+          <div class="tear"></div>
+          <div class="ticket-foot">
+            <span class="ticket-price">₹500</span>
+            <button class="fund-btn" onclick="triggerInvestment('Beverage Baron', 500)">Send ₹500</button>
+          </div>
+        </article>
+
+        <article class="ticket" style="--rot:-0.7deg">
+          <p class="ticket-eyebrow">No. 003</p>
+          <div class="ticket-icon">🍗</div>
+          <h3>Fried Chicken Financier</h3>
+          <p class="ticket-desc">Crucial crispy protein for the climax scene.</p>
+          <div class="tear"></div>
+          <div class="ticket-foot">
+            <span class="ticket-price">₹1,000</span>
+            <button class="fund-btn" onclick="triggerInvestment('Fried Chicken Financier', 1000)">Send ₹1,000</button>
+          </div>
+        </article>
+
+        <article class="ticket ticket--vip" style="--rot:0deg">
+          <p class="ticket-eyebrow">No. 004 · VIP admission</p>
+          <div class="ticket-icon">👑</div>
+          <h3>Executive Producer</h3>
+          <p class="ticket-desc">Full credit: Insta story, WhatsApp bio feature, and a dramatic entry song.</p>
+          <div class="tear"></div>
+          <div class="ticket-foot">
+            <span class="ticket-price">₹2,000</span>
+            <button class="fund-btn" onclick="triggerInvestment('Executive Producer', 2000)">Send ₹2,000</button>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <section class="dossier" aria-labelledby="dossier-heading">
+      <span class="stamp">Confidential</span>
+      <h2 id="dossier-heading">The Non-Didi Agreement</h2>
+      <p>Accepting any tier binds you to full media silence until our face-to-face summit. Zero leaks to Didi. Consider this a black-ops production budget: strictly need-to-know.</p>
+      
+      <label class="nda-checkbox">
+        <input type="checkbox" id="nda-agree">
+        I solemnly swear I will not tell Didi.
+      </label>
+    </section>
+
+  </main>
+
+  <footer class="credits">
+    <p>Produced with 🍿 and mild desperation.</p>
+    <p class="fine-print">This transmission self-destructs if Didi asks questions.</p>
+  </footer>
+
+  <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
+    <div class="ticket-modal">
+      <div class="ticket-modal-notch left"></div>
+      <div class="ticket-modal-notch right"></div>
+      <p class="ticket-eyebrow">Boarding pass · Movie Fund</p>
+      <h3 id="modalTitle">Investment locked in</h3>
+      <p id="modalText"></p>
+      <p class="modal-fine">Proceeding signs the Non-Didi Agreement, effective immediately.</p>
+      
+      <!-- Here is your new QR Code -->
+      <img src="qr.jpeg" alt="Scan to Pay via PhonePe" class="qr-code-img">
+      
+      <button class="pay-btn" id="payBtn" type="button">Sign NDA &amp; Pay via App</button>
+      <button class="copy-btn" id="copyBtn" type="button">Copy UPI ID instead</button>
+      <button class="cancel-btn" id="cancelBtn" type="button">Cancel mission</button>
+    </div>
+  </div>
+
+  <script>
+    // --- Edit these two lines with your details ---
+    const UPI_ID = "YOUR_UPI_ID_HERE@oksbi"; // e.g. 9876543210@paytm or yourname@okicici
+    const PAYEE_NAME = "Shourya";
+    // ------------------------------------------------
+
+    let pendingLink = "";
+
+    const overlay = document.getElementById('modalOverlay');
+    const modalText = document.getElementById('modalText');
+    const payBtn = document.getElementById('payBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const copyBtnDefaultLabel = copyBtn.textContent;
+
+    function triggerInvestment(tierName, amount){
+      // Check if NDA is signed
+      const isNdaSigned = document.getElementById('nda-agree').checked;
+      if (!isNdaSigned) {
+        alert("Hold up! You must sign the Non-Didi Agreement at the bottom first.");
+        document.getElementById('nda-agree').focus();
+        return; 
+      }
+
+      modalText.innerHTML = `You picked the <strong>${tierName}</strong> tier for <strong>₹${amount}</strong>. Scan below to fund!`;
+      
+      // Update the main button text just in case they click it instead of scanning
+      payBtn.textContent = `Sign NDA & Pay ₹${amount} via App`;
+      
+      const note = encodeURIComponent(`Movie Fund: ${tierName}`);
+      pendingLink = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(PAYEE_NAME)}&am=${amount}&cu=INR&tn=${note}`;
+
+      overlay.hidden = false;
+      document.body.style.overflow = 'hidden';
+      document.addEventListener('keydown', onKeydown);
+      payBtn.focus();
+    }
+
+    function closeModal(){
+      overlay.hidden = true;
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', onKeydown);
+    }
+
+    function onKeydown(e){
+      if (e.key === 'Escape') closeModal();
+    }
+
+    payBtn.addEventListener('click', () => {
+      window.location.href = pendingLink;
+      closeModal();
+    });
+
+    copyBtn.addEventListener('click', async () => {
+      try{
+        await navigator.clipboard.writeText(UPI_ID);
+        copyBtn.textContent = 'Copied ✓';
+      }catch(err){
+        copyBtn.textContent = UPI_ID;
+      }
+      setTimeout(() => { copyBtn.textContent = copyBtnDefaultLabel; }, 1800);
+    });
+
+    cancelBtn.addEventListener('click', closeModal);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+
+    function renderBulbs(id, count, reverse){
+      const el = document.getElementById(id);
+      if (!el) return;
+      for (let i = 0; i < count; i++){
+        const b = document.createElement('span');
+        b.className = 'bulb';
+        const delayIndex = reverse ? (count - 1 - i) : i;
+        b.style.animationDelay = `${delayIndex * 0.08}s`;
+        el.appendChild(b);
+      }
+    }
+    renderBulbs('bulbsTop', 16, false);
+    renderBulbs('bulbsBottom', 16, true);
+  </script>
+  
+  <script>
+    // Initialize the Web Audio API context
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playCuteTing() {
+      // Browsers suspend audio context until user interaction; resume it on tap
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+
+      // A 'sine' wave produces a very smooth, clean tone
+      oscillator.type = 'sine';
+      
+      // Set a high frequency (pitch) and glide it up slightly for a happy effect
+      oscillator.frequency.setValueAtTime(900, audioCtx.currentTime); 
+      oscillator.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1); 
+
+      // Volume control: start at 30% and fade out rapidly over 0.3 seconds
+      gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime); 
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+
+      // Connect the nodes to the speakers
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      // Play and stop
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + 0.3);
+    }
+
+    // Trigger the sound whenever the user taps/clicks anywhere on the page
+    document.addEventListener('click', playCuteTing);
+  </script>
+
+</body>
+</html>
